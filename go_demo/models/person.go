@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"strconv"
 	"time"
 
@@ -24,11 +25,17 @@ func GetNumberOfPersons(numberOfPersons string) ([]*Person, error) {
 }
 
 func GetAllPersons() ([]*Person, error) {
-	return getPersonsByQuery("SELECT id, firstName, lastName, birthDate, timestamp FROM persons", "")
+	return getPersonsByQuery("SELECT id, firstName, lastName, birthDate, timestamp FROM persons")
 }
 
-func getPersonsByQuery(sqlQuery string, numberOfPersons string) ([]*Person, error) {
-	personRows, err := db.Query(sqlQuery, numberOfPersons)
+func getPersonsByQuery(sqlQuery string, numberOfPersons ...string) ([]*Person, error) {
+	var personRows *sql.Rows
+	var err error
+	if len(numberOfPersons) > 0 {
+		personRows, err = db.Query(sqlQuery, numberOfPersons[0])
+	} else {
+		personRows, err = db.Query(sqlQuery)
+	}
 	if err != nil {
 		return nil, err
 	}
